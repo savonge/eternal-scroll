@@ -898,6 +898,95 @@ function fmtDate(d) {
   const mn = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const dt = new Date(d); return mn[dt.getMonth()] + ' ' + dt.getDate() + ', ' + dt.getFullYear();
 }
+// ── SUPABASE LIVE LOADER ──
+(async function loadFromSupabase() {
+  const SUPA_URL = "https://ajoywjqpjekfhsbizlmf.supabase.co";
+  const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqb3l3anFwamVrZmhzYml6bG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NTQ5NjMsImV4cCI6MjA5MjQzMDk2M30.z0QBaFFFm3RVRjsGChoHLFodfWqII5lspTaWY3vHoKU";
+
+  try {
+    const res = await fetch(
+      SUPA_URL + '/rest/v1/live_entries?select=*&order=entry_num.asc',
+      { headers: {
+          'apikey': SUPA_KEY,
+          'Authorization': 'Bearer ' + SUPA_KEY
+        }
+      }
+    );
+    if (!res.ok) throw new Error('Supabase fetch failed: ' + res.status);
+    const rows = await res.json();
+    if (!rows || rows.length === 0) return;
+
+    // Parse rows into LIVE format
+    const freshEntries = rows.map(row => ({
+      date:          row.date,
+      date_biblical: row.date_biblical,
+      title:         row.title,
+      entry_num:     row.entry_num,
+      verses:        Array.isArray(row.verses) ? row.verses : JSON.parse(row.verses)
+    }));
+
+    // If data matches what we have, do nothing
+    if (freshEntries.length === LIVE.length) return;
+
+    // New entries arrived — re-render live archive and current
+    const archiveEl = document.getElementById('live-archive');
+    archiveEl.innerHTML = '';
+
+    // Update global LIVE
+    LIVE.length = 0;
+    freshEntries.forEach(e => LIVE.push(e));
+
+    // Re-render archive (all but last)
+    LIVE.slice(0,-1).forEach(entry => {
+      const sec = document.createElement('section');
+      sec.className = 'book-section';
+      sec.id = bid(entry.title);
+      sec.innerHTML = \`
+        <div class="book-header">
+          <div class="book-division-tag">The Living Word</div>
+          <div class="book-name-large">\${entry.title}</div>
+          <div class="book-era">\${entry.date_biblical}</div>
+        </div>
+        <div class="book-text">
+          <div class="chapter-block">
+            <div class="ch-label">\${fmtDate(entry.date)}</div>
+            \${entry.verses.map((v,i) => {
+              const isFirst = i===0;
+              const isThus  = v.toLowerCase().startsWith('thus saith');
+              const cls     = isFirst ? 'verse verse-large' : isThus ? 'verse verse-emphasis' : 'verse';
+              return \`<p class="\${cls}"><span class="vn">\${i+1}</span><span class="vt">\${esc(v)}</span></p>\`;
+            }).join('')}
+          </div>
+        </div>
+      \`;
+      archiveEl.appendChild(sec);
+      navObs.observe(sec);
+    });
+
+    // Update current live entry header
+    const current = LIVE[LIVE.length - 1];
+    document.getElementById('live-title').textContent = 'For the time being';
+    document.getElementById('live-date-biblical').textContent = current.date_biblical;
+
+    // Reset and restart typewriter with fresh content
+    twStarted = false;
+    document.getElementById('live-verses').innerHTML = '';
+    document.getElementById('scroll-rests').classList.remove('visible');
+
+    // Rebuild desktop timeline to include any new entries
+    const dtl = document.getElementById('desktop-tl');
+    if (dtl) {
+      dtl.innerHTML = '';
+      // re-trigger the desktop timeline build
+      const evt = new Event('resize');
+      window.dispatchEvent(evt);
+    }
+
+  } catch(e) {
+    console.warn('Supabase load failed, using fallback data:', e.message);
+  }
+})();
+
 </script>
 
   <!-- Scroll icon -->
