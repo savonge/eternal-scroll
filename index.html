@@ -915,6 +915,15 @@ var supabaseLoaded = false;
     var restsEl = document.getElementById('scroll-rests');
     if (restsEl) restsEl.classList.remove('visible');
 
+    // Re-trigger typewriter if live section already in view
+    var liveEl = document.getElementById('live-current');
+    if (liveEl) {
+      var rect = liveEl.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        setTimeout(function() { startTypewriter(); }, 200);
+      }
+    }
+
   } catch(e) {
     console.warn('Live entries fetch failed, using fallback:', e.message);
   }
