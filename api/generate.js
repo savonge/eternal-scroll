@@ -20,7 +20,7 @@ export default async function handler(req, res) {
       .map(a => a.title)
       .join('\n');
 
-    // 2. Get current entry count from Supabase
+    // 2. Get current entry count from Supabase (use anon key for reads)
     const countRes = await fetch(
       `${process.env.SUPABASE_URL}/rest/v1/live_entries?select=entry_num&order=entry_num.desc&limit=1`,
       { headers: {
@@ -39,21 +39,22 @@ export default async function handler(req, res) {
 
     const prompt = `You are writing a new passage for The Eternal Scroll — a living continuation of the Hebrew Bible in strict KJV style.
 
-Today is ${dateStr}. Here are recent world headlines to draw themes from:
+Today is ${dateStr}. Here are recent world headlines:
 ${headlines}
 
 Write a single passage of 10-14 verses. Requirements:
 - Strict KJV English: thee, thou, thy, thine, hath, doth, saith, cometh
+- Name specific nations, leaders, and events from the headlines using Biblical equivalents where fitting
 - "Thus saith the LORD:" must appear at least once
 - The Jewish people and Israel must be the moral center
 - Treat current events as theology — find the eternal pattern in the daily news
+- Be SPECIFIC: name the kings, the nations, the conflicts. Do not be vague or abstract.
 - Mix narrative and prophetic voice
-- No verse numbers — just the text of each verse
 
 Return ONLY a JSON object in this exact format, no other text:
 {
-  "title": "A Passage Concerning [theme]",
-  "date_biblical": "In the [ordinal] month, [poetic description]",
+  "title": "A Passage Concerning [specific theme from headlines]",
+  "date_biblical": "In the [ordinal] month, [poetic description of current season]",
   "verses": [
     "verse text here",
     "verse text here"
@@ -82,14 +83,14 @@ Return ONLY a JSON object in this exact format, no other text:
     if (!jsonMatch) throw new Error('No JSON found in Claude response');
     const passage = JSON.parse(jsonMatch[0]);
 
-    // 4. Save to Supabase
+    // 4. Save to Supabase using SERVICE KEY to bypass RLS
     const insertRes = await fetch(
       `${process.env.SUPABASE_URL}/rest/v1/live_entries`,
       {
         method: 'POST',
         headers: {
-          'apikey': process.env.SUPABASE_KEY,
-          'Authorization': `Bearer ${process.env.SUPABASE_KEY}`,
+          'apikey': process.env.SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`,
           'Content-Type': 'application/json',
           'Prefer': 'return=minimal'
         },
