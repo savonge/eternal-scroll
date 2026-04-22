@@ -853,21 +853,14 @@ function fmtDate(d) {
   const mn = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const dt = new Date(d); return mn[dt.getMonth()] + ' ' + dt.getDate() + ', ' + dt.getFullYear();
 }
-
-// Load live entries from Supabase on page load
+var supabaseLoaded = false;
 (async function loadLiveFromSupabase() {
-  var SURL = "https://ajoywjqpjekfhsbizlmf.supabase.co";
-  var SKEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqb3l3anFwamVrZmhzYml6bG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NTQ5NjMsImV4cCI6MjA5MjQzMDk2M30.z0QBaFFFm3RVRjsGChoHLFodfWqII5lspTaWY3vHoKU";
   try {
-    var res = await fetch(
-      SURL + '/rest/v1/live_entries?select=*&order=entry_num.asc',
-      { headers: { 'apikey': SKEY, 'Authorization': 'Bearer ' + SKEY } }
-    );
+    var res = await fetch('/api/entries');
     if (!res.ok) return;
     var rows = await res.json();
     if (!rows || rows.length === 0) return;
 
-    // Parse entries
     var entries = rows.map(function(r) {
       return {
         date:          r.date,
@@ -878,11 +871,9 @@ function fmtDate(d) {
       };
     });
 
-    // Update LIVE array in place
     LIVE.length = 0;
     entries.forEach(function(e) { LIVE.push(e); });
 
-    // Re-render live archive (all but last entry)
     var archiveEl = document.getElementById('live-archive');
     if (!archiveEl) return;
     archiveEl.innerHTML = '';
@@ -912,14 +903,12 @@ function fmtDate(d) {
       navObs.observe(sec);
     });
 
-    // Update current live entry header
     var current = LIVE[LIVE.length - 1];
     var titleEl = document.getElementById('live-title');
     var dateEl  = document.getElementById('live-date-biblical');
     if (titleEl) titleEl.textContent = 'For the time being';
     if (dateEl)  dateEl.textContent  = current.date_biblical;
 
-    // Reset typewriter so it uses the fresh content
     twStarted = false;
     var versesEl = document.getElementById('live-verses');
     if (versesEl) versesEl.innerHTML = '';
@@ -927,8 +916,7 @@ function fmtDate(d) {
     if (restsEl) restsEl.classList.remove('visible');
 
   } catch(e) {
-    // Silently fall back to hardcoded LIVE entries
-    console.warn('Supabase fetch failed, using fallback:', e.message);
+    console.warn('Live entries fetch failed, using fallback:', e.message);
   }
 })();
 
