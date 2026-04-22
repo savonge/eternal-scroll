@@ -268,6 +268,9 @@
   @media (min-width:860px) {
     .book-header { padding: 80px 40px 56px; max-width: 780px; margin: 0 auto; border-bottom: none; }
     .book-section { border-bottom: 1px solid var(--rule-light); }
+    /* Prevent title from bleeding into the fixed timeline (240px wide) */
+    .book-name-large { max-width: 100%; word-break: break-word; }
+    #main-wrap { padding-left: 0; }
   }
 
   .book-division-tag {
@@ -280,10 +283,18 @@
   /* BIG title, tight line height */
   .book-name-large {
     font-family: 'Cinzel', serif;
-    font-size: clamp(48px, 9vw, 96px);
+    font-size: clamp(32px, 6vw, 80px);
     font-weight: 400; color: var(--ink);
     line-height: 0.95; letter-spacing: 0.01em;
     margin-bottom: 24px;
+  }
+  /* On desktop, keep titles within safe content area */
+  @media (min-width: 860px) {
+    .book-name-large {
+      font-size: clamp(32px, 5vw, 72px);
+      padding: 0 260px; /* 240px timeline + 20px breathing room */
+    }
+    .book-header { padding-left: 0 !important; padding-right: 0 !important; }
   }
 
   .book-era {
