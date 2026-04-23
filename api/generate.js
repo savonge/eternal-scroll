@@ -68,7 +68,7 @@ Return ONLY a JSON object, no other text:
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-opus-4-5',
+        model: 'claude-opus-4-7',
         max_tokens: 2000,
         messages: [{ role: 'user', content: prompt }]
       })

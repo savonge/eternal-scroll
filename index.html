@@ -516,16 +516,8 @@ lh.className = 'tl-section-head';
 lh.textContent = 'The Living Word · Now';
 tlList.appendChild(lh);
 
-LIVE.slice(0,-1).forEach(entry => {
-  const btn = document.createElement('button');
-  btn.className = 'tl-book';
-  btn.dataset.book = bid(entry.title);
-  btn.innerHTML = `<span class="tl-dot"></span><span class="tl-name">${entry.title}</span>`;
-  btn.addEventListener('click', () => { goTo(bid(entry.title)); closeDrawer(); });
-  tlList.appendChild(btn);
-});
-
-const currentEntry = LIVE[LIVE.length-1];
+// "For the time being" is always present in the drawer.
+// Archive entries are inserted before this button by hydrateLive() once fetch completes.
 const cb = document.createElement('button');
 cb.className = 'tl-book';
 cb.dataset.book = 'live-current';
@@ -644,56 +636,29 @@ function renderGap(book, from, to) {
   }
 }
 
-// ── LIVE ARCHIVE ──
+// ── LIVE ARCHIVE: container only; populated by hydrateLive() ──
 const archiveEl = document.getElementById('live-archive');
-LIVE.slice(0,-1).forEach(entry => {
-  const sec = document.createElement('section');
-  sec.className = 'book-section';
-  sec.id = bid(entry.title);
-  sec.innerHTML = `
-    <div class="book-header">
-      <div class="book-division-tag">The Living Word</div>
-      <div class="book-name-large">${entry.title}</div>
-      <div class="book-era">${entry.date_biblical}</div>
-    </div>
-    <div class="book-text">
-      <div class="chapter-block">
-        <div class="ch-label">${fmtDate(entry.date)}</div>
-        ${entry.verses.map((v,i) => {
-          const isFirst = i===0;
-          const isThus  = v.toLowerCase().startsWith('thus saith');
-          const cls     = isFirst ? 'verse verse-large' : isThus ? 'verse verse-emphasis' : 'verse';
-          return `<p class="${cls}"><span class="vn">${i+1}</span><span class="vt">${esc(v)}</span></p>`;
-        }).join('')}
-      </div>
-    </div>
-  `;
-  archiveEl.appendChild(sec);
-});
-
-// ── LIVE CURRENT HEADER ──
-document.getElementById('live-title').textContent = 'For the time being';
-document.getElementById('live-date-biblical').textContent = currentEntry.date_biblical;
 
 // ── TYPEWRITER ──
 let twStarted = false;
+let twEntry   = null;  // populated by hydrateLive() when fetch completes
 
 function startTypewriter() {
-  if (twStarted) return;
+  if (twStarted || !twEntry) return;
   twStarted = true;
   const container = document.createElement('div');
   container.className = 'chapter-block';
   const chLabel = document.createElement('div');
   chLabel.className = 'ch-label';
   chLabel.style.opacity = '0';
-  chLabel.textContent = fmtDate(currentEntry.date);
+  chLabel.textContent = fmtDate(twEntry.date);
   container.appendChild(chLabel);
   document.getElementById('live-verses').appendChild(container);
 
   setTimeout(() => { chLabel.style.transition = 'opacity 1s'; chLabel.style.opacity = '1'; }, 400);
 
   let delay = 1800;
-  currentEntry.verses.forEach((text, vi) => {
+  twEntry.verses.forEach((text, vi) => {
     delay += vi === 0 ? 0 : 700;
     scheduleVerse(container, vi, text, delay);
     delay += text.length * 28;
@@ -733,7 +698,7 @@ function scheduleVerse(container, vi, text, startDelay) {
 }
 
 const twObs = new IntersectionObserver(entries => {
-  if (entries[0].isIntersecting && !twStarted && LIVE.length > 0) startTypewriter();
+  if (entries[0].isIntersecting && !twStarted && twEntry) startTypewriter();
 }, { threshold: 0.1 });
 twObs.observe(document.getElementById('live-current'));
 
@@ -773,6 +738,9 @@ document.querySelectorAll('.book-section').forEach(s => navObs.observe(s));
 const CANON_DATES = {"Genesis":"c. 2000 BCE","Exodus":"c. 1500 BCE","Leviticus":"c. 1400 BCE","Numbers":"c. 1400 BCE","Deuteronomy":"c. 1400 BCE","Joshua":"c. 1200 BCE","Judges":"c. 1100 BCE","I Samuel":"c. 1050 BCE","II Samuel":"c. 1000 BCE","I Kings":"c. 960 BCE","II Kings":"c. 722 BCE","Isaiah":"c. 740 BCE","Jeremiah":"c. 627 BCE","Ezekiel":"c. 593 BCE","Amos":"c. 760 BCE","Hosea":"c. 750 BCE","Micah":"c. 735 BCE","Zechariah":"c. 520 BCE","Malachi":"c. 450 BCE","Psalms":"c. 1000 BCE","Proverbs":"c. 950 BCE","Job":"c. 600 BCE","Song of Songs":"c. 950 BCE","Ruth":"c. 1100 BCE","Lamentations":"c. 586 BCE","Ecclesiastes":"c. 935 BCE","Esther":"c. 480 BCE","Daniel":"c. 605 BCE","Ezra":"c. 458 BCE","Nehemiah":"c. 445 BCE","I Chronicles":"c. 450 BCE","II Chronicles":"c. 450 BCE"};
 const GAP_DATES   = {"Silence":"450–330 BCE","Javan":"330–165 BCE","Kittim":"63 BCE–70 CE","Embers":"70–200 CE","The Exile":"200–700 CE","Sepharad":"1000–1500 CE","Enlightenment":"1650–1880 CE","Havoc":"1880–1918 CE","Ashes":"1933–1945 CE","Ezekiel":"1945–1949 CE","Zion":"1949–2000 CE","Today":"2000–present"};
 
+// dtlAddArchive: assigned by the IIFE below, called by hydrateLive() once fetch completes.
+let dtlAddArchive = function() {};
+
 (function() {
   const dtl = document.getElementById('desktop-tl');
   if (!dtl) return;
@@ -788,18 +756,16 @@ const GAP_DATES   = {"Silence":"450–330 BCE","Javan":"330–165 BCE","Kittim":
   GAP.forEach(book => {
     allEntries.push({ id: bid(book.title), name: book.title, date: GAP_DATES[book.title] || '' });
   });
-  LIVE.slice(0,-1).forEach(entry => {
-    allEntries.push({ id: bid(entry.title), name: entry.title, date: fmtDate(entry.date) });
-  });
+  // "For the time being" is always the last entry; archive entries are spliced in
+  // immediately before it once the fetch resolves.
   allEntries.push({ id: 'live-current', name: 'For the time being', date: 'Present', live: true });
 
-  const lastIdx = allEntries.length - 1;
-  const GAP_PX  = 1;    // 1px gap between segments
+  const GAP_PX = 1;
 
-  allEntries.forEach((entry, i) => {
+  function buildEntry(entry, i, total) {
     const el = document.createElement('div');
     el.className = 'dtl-entry'
-      + (i === 0 || i === lastIdx ? ' always-visible' : '')
+      + (i === 0 || i === total - 1 ? ' always-visible' : '')
       + (entry.live ? ' live' : '');
     el.dataset.id  = entry.id;
     el.dataset.idx = i;
@@ -807,13 +773,19 @@ const GAP_DATES   = {"Silence":"450–330 BCE","Javan":"330–165 BCE","Kittim":
       + (entry.date ? '<span class="dtl-date">' + entry.date + '</span>' : '')
       + '</div><div class="dtl-segment"></div>';
     el.addEventListener('click', () => goTo(entry.id));
-    list.appendChild(el);
-  });
+    return el;
+  }
+
+  function rebuild() {
+    list.innerHTML = '';
+    allEntries.forEach((entry, i) => list.appendChild(buildEntry(entry, i, allEntries.length)));
+  }
+  rebuild();
   dtl.appendChild(list);
 
   // Size segments to fill viewport height exactly
   function sizeSegments() {
-    const totalEntries = allEntries.length;
+    const totalEntries  = allEntries.length;
     const paddingTop    = 40;
     const paddingBottom = 40;
     const available     = window.innerHeight - paddingTop - paddingBottom;
@@ -830,6 +802,21 @@ const GAP_DATES   = {"Silence":"450–330 BCE","Javan":"330–165 BCE","Kittim":
 
   sizeSegments();
   window.addEventListener('resize', sizeSegments);
+
+  // Exposed: lets hydrateLive() insert archive entries before "For the time being"
+  // and recompute segment heights so the timeline still fits the viewport.
+  dtlAddArchive = function(entries) {
+    if (!entries || !entries.length) return;
+    entries.forEach(entry => {
+      allEntries.splice(allEntries.length - 1, 0, {
+        id: bid(entry.title),
+        name: entry.title,
+        date: fmtDate(entry.date)
+      });
+    });
+    rebuild();
+    sizeSegments();
+  };
 })();
 
 // ── PROGRESS ──
@@ -853,54 +840,92 @@ function fmtDate(d) {
   const mn = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const dt = new Date(d); return mn[dt.getMonth()] + ' ' + dt.getDate() + ', ' + dt.getFullYear();
 }
-// Fetch live entries then start typewriter
-(async function() {
-  try {
-    var res = await fetch('/api/entries');
-    if (!res.ok) throw new Error('fetch failed');
-    var rows = await res.json();
-    if (!rows || rows.length === 0) throw new Error('empty');
+// ── HYDRATE LIVE CONTENT ──
+// Single source of truth: ALL live-section rendering happens inside this function.
+// Synchronous rendering of LIVE was removed because LIVE is empty until fetch resolves.
+function hydrateLive(rows) {
+  if (!rows || !rows.length) return;
 
-    // Populate LIVE
-    rows.forEach(function(r) {
-      LIVE.push({
-        date: r.date,
-        date_biblical: r.date_biblical,
-        title: r.title,
-        entry_num: r.entry_num,
-        verses: Array.isArray(r.verses) ? r.verses : JSON.parse(r.verses)
-      });
+  // Populate LIVE
+  rows.forEach(function(r) {
+    LIVE.push({
+      date:          r.date,
+      date_biblical: r.date_biblical,
+      title:         r.title,
+      entry_num:     r.entry_num,
+      verses:        Array.isArray(r.verses) ? r.verses : JSON.parse(r.verses)
     });
+  });
 
-    // Render archive entries (all but last)
-    var archiveEl = document.getElementById('live-archive');
-    LIVE.slice(0, -1).forEach(function(entry) {
-      var sec = document.createElement('section');
-      sec.className = 'book-section';
-      sec.id = bid(entry.title);
-      var versesHtml = entry.verses.map(function(v, i) {
-        var cls = i===0 ? 'verse verse-large' : v.toLowerCase().indexOf('thus saith')===0 ? 'verse verse-emphasis' : 'verse';
-        return '<p class="'+cls+'"><span class="vn">'+(i+1)+'</span><span class="vt">'+esc(v)+'</span></p>';
-      }).join('');
-      sec.innerHTML = '<div class="book-header"><div class="book-division-tag">The Living Word</div><div class="book-name-large">'+entry.title+'</div><div class="book-era">'+entry.date_biblical+'</div></div><div class="book-text"><div class="chapter-block"><div class="ch-label">'+fmtDate(entry.date)+'</div>'+versesHtml+'</div></div>';
-      archiveEl.appendChild(sec);
-      navObs.observe(sec);
-    });
+  const archive = LIVE.slice(0, -1);
+  const current = LIVE[LIVE.length - 1];
 
-    // Update current entry header
-    var cur = LIVE[LIVE.length-1];
-    document.getElementById('live-title').textContent = 'For the time being';
-    document.getElementById('live-date-biblical').textContent = cur.date_biblical;
+  // 1. Render archive sections into #live-archive
+  archive.forEach(function(entry) {
+    const sec = document.createElement('section');
+    sec.className = 'book-section';
+    sec.id = bid(entry.title);
+    const versesHtml = entry.verses.map(function(v, i) {
+      const cls = i === 0
+        ? 'verse verse-large'
+        : v.toLowerCase().indexOf('thus saith') === 0
+          ? 'verse verse-emphasis'
+          : 'verse';
+      return '<p class="' + cls + '"><span class="vn">' + (i + 1) + '</span><span class="vt">' + esc(v) + '</span></p>';
+    }).join('');
+    sec.innerHTML =
+      '<div class="book-header">'
+        + '<div class="book-division-tag">The Living Word</div>'
+        + '<div class="book-name-large">' + entry.title + '</div>'
+        + '<div class="book-era">' + entry.date_biblical + '</div>'
+      + '</div>'
+      + '<div class="book-text"><div class="chapter-block">'
+        + '<div class="ch-label">' + fmtDate(entry.date) + '</div>'
+        + versesHtml
+      + '</div></div>';
+    archiveEl.appendChild(sec);
+    navObs.observe(sec);
+  });
 
-    // Now start typewriter if section in view, else observer will catch it
-    var liveEl = document.getElementById('live-current');
-    var rect = liveEl.getBoundingClientRect();
+  // 2. Insert archive entries into mobile drawer (before "For the time being")
+  archive.forEach(function(entry) {
+    const btn = document.createElement('button');
+    btn.className = 'tl-book';
+    btn.dataset.book = bid(entry.title);
+    btn.innerHTML = '<span class="tl-dot"></span><span class="tl-name">' + entry.title + '</span>';
+    btn.addEventListener('click', function() { goTo(bid(entry.title)); closeDrawer(); });
+    tlList.insertBefore(btn, cb);
+  });
+
+  // 3. Insert archive entries into desktop timeline (and resize segments)
+  dtlAddArchive(archive);
+
+  // 4. Set the current entry header
+  if (current) {
+    document.getElementById('live-date-biblical').textContent = current.date_biblical || '';
+    twEntry = current;
+
+    // 5. If the live section is already in view (e.g. user landed there directly
+    //    or fetch resolved after they scrolled past it), start now. Otherwise the
+    //    IntersectionObserver will fire startTypewriter() when it scrolls in.
+    const liveEl = document.getElementById('live-current');
+    const rect   = liveEl.getBoundingClientRect();
     if (rect.top < window.innerHeight && rect.bottom > 0) {
       startTypewriter();
     }
+  }
+}
 
-  } catch(e) {
-    console.warn('Fetch failed:', e.message);
+// ── FETCH LIVE ENTRIES FROM SUPABASE ──
+(async function() {
+  try {
+    const res = await fetch('/api/entries');
+    if (!res.ok) throw new Error('fetch failed: ' + res.status);
+    const rows = await res.json();
+    hydrateLive(rows);
+  } catch (e) {
+    console.warn('Live fetch failed:', e.message);
+    // Fail gracefully — the rest of the scroll renders fine without live content.
   }
 })();
 
