@@ -7,11 +7,18 @@ export default async function handler(req, res) {
 
   try {
     const newsRes = await fetch(
-      `https://newsapi.org/v2/top-headlines?language=en&pageSize=10&apiKey=${process.env.NEWS_API_KEY}`
+      `https://newsapi.org/v2/top-headlines?sources=bbc-news,reuters,associated-press,al-jazeera-english&pageSize=15&apiKey=${process.env.NEWS_API_KEY}`
     );
     const newsData = await newsRes.json();
-    const headlines = newsData.articles
-      .slice(0, 8)
+
+    // Filter to geopolitically relevant headlines — skip sport, entertainment, crime
+    const skipWords = ['sport','soccer','football','basketball','nba','nfl','film','movie','music','album','award','oscar','celebrity','arrested','charged','murder','killed suspect','serial'];
+    const filtered = (newsData.articles || [])
+      .filter(a => {
+        const t = (a.title || '').toLowerCase();
+        return !skipWords.some(w => t.includes(w));
+      })
+      .slice(0, 10)
       .map(a => a.title)
       .join('\n');
 
@@ -33,23 +40,23 @@ export default async function handler(req, res) {
     const prompt = `You are writing a new passage for The Eternal Scroll — a living continuation of the Hebrew Bible in strict KJV style.
 
 Today is ${dateStr}. Here are recent world headlines:
-${headlines}
+${filtered}
 
 Write a single passage of 10-14 verses. Requirements:
 - Strict KJV English: thee, thou, thy, thine, hath, doth, saith, cometh
-- Name specific nations, leaders, and events from the headlines using Biblical equivalents
-- "Thus saith the LORD:" must appear at least once  
-- The Jewish people and Israel must be the moral center
-- Treat current events as theology — find the eternal pattern in the daily news
-- Be SPECIFIC: name the kings, the nations, the conflicts. Do not be vague.
+- Focus ONLY on geopolitical events — wars, the fate of nations, the rise and fall of powers, diplomacy, and persecution. Ignore crime, sport, and entertainment entirely.
+- View all events through the lens of Jewish and Israeli history and the covenant between God and Israel. The Jewish people and the land of Israel are the moral and spiritual centre of the passage.
+- Name specific nations and their rulers using Biblical equivalents (e.g. Persia, Ashur, Mitzraim, Edom, the isles of the sea). Where Israel or its enemies are named in the headlines, name them plainly.
+- "Thus saith the LORD:" must appear at least once
+- Treat current events as theology — find the eternal pattern in the daily news as seen from the perspective of the Hebrew prophetic tradition
 - Mix narrative and prophetic voice
 
 TITLE RULES — this is critical:
 - The title must be 1-3 words maximum
-- Named after a person, place, or single concept — like the actual Bible books
-- Examples of good titles: "The Decree", "Nineveh", "The Iron Throne", "Babylon", "The Envoys"
+- Named after a nation, place, event, or single prophetic concept — like the actual Bible books
+- Examples of good titles: "The Decree", "Nineveh", "The Iron Throne", "Babylon", "The Envoys", "The Council"
 - NO titles like "A Passage Concerning..." — that is forbidden
-- Think: Genesis, Exodus, Lamentations — that register
+- Think: Isaiah, Lamentations, Amos — that register
 
 Return ONLY a JSON object, no other text:
 {
