@@ -117,91 +117,138 @@
   .tl-pulse { width:7px; height:7px; border-radius:50%; background:var(--ink); flex-shrink:0; animation:pulse 2s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.3;transform:scale(0.65);} }
 
-  /* ── DESKTOP TIMELINE — Jobs Archive style ── */
+  /* ── DESKTOP TIMELINE — Figma B spec ── */
   #desktop-tl {
     display: none;
     position: fixed;
-    top: 0; left: 0;
-    width: 240px;
+    top: 0; left: 24px;
+    width: 120px;
     height: 100vh;
-    /* No padding/overflow — JS sizes segments to exact viewport */
-    overflow: hidden;
-    scrollbar-width: none;
+    overflow: visible;
     z-index: 100;
-    background: var(--bg);
+    background: transparent;
   }
-  #desktop-tl::-webkit-scrollbar { display: none; }
 
   .dtl-list {
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    padding: 40px 32px;
+    align-items: center;
+    padding: 36px 0;
     height: 100%;
-    /* JS will set segment heights dynamically */
+    position: relative;
   }
 
   .dtl-entry {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 14px;
+    justify-content: center;
     cursor: pointer;
     position: relative;
     width: 100%;
-    /* flex-shrink:0 so segments don't compress — height set by JS */
     flex-shrink: 0;
   }
 
-  .dtl-label {
-    text-align: right;
-    opacity: 0;
-    transform: translateX(8px);
-    transition: opacity 0.18s, transform 0.18s;
+  /* Segment — 5px wide, 1px gap, unchanged */
+  .dtl-segment {
+    width: 5px;
+    background: var(--rule);
+    flex-shrink: 0;
+    transition: background 0.15s;
+    margin-bottom: 1px;
+  }
+  .dtl-entry:hover .dtl-segment  { background: var(--ink); }
+  .dtl-entry.active .dtl-segment { background: var(--ink); }
+  .dtl-entry.live .dtl-segment   { background: var(--rule); }
+  .dtl-entry.live:hover .dtl-segment { background: var(--ink); animation: pulse-line 2s ease-in-out infinite; }
+  @keyframes pulse-line { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  /* ── DATE LABELS — top and bottom, date text only, centered on line ── */
+  .dtl-label-fixed {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
     pointer-events: none;
     white-space: nowrap;
-    flex: 1;
-    min-width: 0;
   }
+  .dtl-entry:first-child .dtl-label-fixed { bottom: calc(100% + 5px); }
+  /* Bottom label: position relative to the dtl-list, not the last entry.
+     Placed via JS as a sibling after the list so it sits below the line cleanly. */
+
+  /* ── UNIFIED TOOLTIP CARD — hover only, floats right of line ── */
+  .dtl-label-card {
+    background: #ffffff;
+    border-radius: 2px;
+    padding: 3px 7px 4px;
+    box-shadow: 0 1.6px 4.8px rgba(0,0,0,0.10), 0 4.8px 14.4px rgba(0,0,0,0.13);
+    white-space: nowrap;
+  }
+  .dtl-label-hover {
+    position: absolute;
+    left: calc(50% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    display: flex;
+    align-items: center;
+    z-index: 200;
+  }
+  .dtl-label-hover::before {
+    content: '';
+    display: block;
+    width: 0; height: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-right: 5px solid #ffffff;
+    flex-shrink: 0;
+  }
+  /* Tooltip shows on hover only — NOT on active, to avoid it being
+     permanently open on the first/current book */
+  .dtl-entry:hover .dtl-label-hover { opacity: 1; }
+
+  /* Bottom date label — absolutely positioned on the container, not an entry */
+  .dtl-bottom-label {
+    position: absolute;
+    bottom: 20px;            /* sits below the last segment, inside the fixed container */
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  /* ── SECTION LABELS — Torah / Nevi'im / Ktuvim / Toledot — left edge of column ── */
+  .dtl-section-label {
+    position: absolute;
+    left: 0;                 /* left edge of the 120px column */
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    pointer-events: none;
+    text-align: left;
+  }
+
+  /* ── SHARED TEXT STYLES ── */
   .dtl-name {
     display: block;
     font-family: 'EB Garamond', serif;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--ink);
-    line-height: 1.2;
-    font-style: italic;
+    line-height: 1.25;
   }
   .dtl-date {
     display: block;
     font-family: 'Cinzel', serif;
-    font-size: 8.5px;
-    letter-spacing: 0.12em;
-    color: var(--ink-faint);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: #515B67;
     margin-top: 1px;
     text-transform: uppercase;
   }
-
-  /* Segment = the line piece. Width set here, height set by JS */
-  .dtl-segment {
-    width: 5px;
-    /* height injected inline by JS */
-    background: var(--rule);
-    flex-shrink: 0;
-    transition: background 0.15s, width 0.15s;
-    margin-bottom: 1px;
-  }
-
-  .dtl-entry:hover .dtl-segment  { background: var(--ink); width: 5px; }
-  .dtl-entry:hover .dtl-label    { opacity: 1; transform: translateX(0); }
-  .dtl-entry.active .dtl-segment { background: var(--ink); width: 5px; }
-  .dtl-entry.active .dtl-label   { opacity: 1; transform: translateX(0); }
-  .dtl-entry.always-visible .dtl-label { opacity: 1; transform: translateX(0); }
-
-  .dtl-entry.live .dtl-segment {
-    background: var(--ink);
-    animation: pulse-line 2s ease-in-out infinite;
-  }
-  @keyframes pulse-line { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
 
   /* ── DESKTOP LAYOUT ── */
   @media (min-width:860px) {
@@ -209,7 +256,6 @@
     #overlay { display:none !important; }
     #drawer  { display:none; }
     #desktop-tl { display:block; }
-    /* Timeline is fixed/overlaid — main content spans full viewport */
     #main-wrap { margin-left: 0; }
   }
 
@@ -747,33 +793,89 @@ let dtlAddArchive = function() {};
   const list = document.createElement('div');
   list.className = 'dtl-list';
 
+  // Section boundary indices (0-based, into allEntries):
+  // Torah: 5 books (Genesis–Deuteronomy), indices 0–4
+  // Nevi'im: 14 books, indices 5–18
+  // Ktuvim: 13 books, indices 19–31
+  // Toledot (Gap + Live): starts at index 32
+  const SECTION_STARTS = {
+    0:  'Torah',
+    5:  "Nevi\u2019im",
+    19: 'Ktuvim',
+    32: 'Toledot'
+  };
+
   const allEntries = [];
   Object.entries(TANAKH).forEach(([div, info]) => {
     info.books.forEach(name => {
-      allEntries.push({ id: bid(name), name, date: CANON_DATES[name] || '' });
+      allEntries.push({ id: bid(name), name, date: CANON_DATES[name] || '', div });
     });
   });
   GAP.forEach(book => {
     allEntries.push({ id: bid(book.title), name: book.title, date: GAP_DATES[book.title] || '' });
   });
-  // "For the time being" is always the last entry; archive entries are spliced in
-  // immediately before it once the fetch resolves.
-  allEntries.push({ id: 'live-current', name: 'For the time being', date: 'Present', live: true });
+  allEntries.push({ id: 'live-current', name: 'For the time being', date: 'Nowadays', live: true });
 
   const GAP_PX = 1;
+  const PADDING = 36;
+
+  // Top fixed label: date of first entry only
+  const topLabel = CANON_DATES['Genesis'] || 'c. 2000 BCE';
+  // Bottom label: current year + CE, rendered on the container (not an entry)
+  function bottomLabel() { return new Date().getFullYear() + ' CE'; }
 
   function buildEntry(entry, i, total) {
+    const isFirst = i === 0;
     const el = document.createElement('div');
-    el.className = 'dtl-entry'
-      + (i === 0 || i === total - 1 ? ' always-visible' : '')
-      + (entry.live ? ' live' : '');
+    el.className = 'dtl-entry' + (entry.live ? ' live' : '');
     el.dataset.id  = entry.id;
     el.dataset.idx = i;
-    el.innerHTML = '<div class="dtl-label"><span class="dtl-name">' + entry.name + '</span>'
-      + (entry.date ? '<span class="dtl-date">' + entry.date + '</span>' : '')
-      + '</div><div class="dtl-segment"></div>';
+
+    // Fixed date label only on first entry (above the line)
+    const fixedHtml = isFirst
+      ? '<div class="dtl-label-fixed"><span class="dtl-date">' + topLabel + '</span></div>'
+      : '';
+
+    // Unified tooltip: same for all entries, hover only
+    const dateHtml = entry.date
+      ? '<span class="dtl-date">' + entry.date + '</span>'
+      : '';
+    const tooltipHtml = '<div class="dtl-label-hover"><div class="dtl-label-card">'
+      + '<span class="dtl-name">' + entry.name + '</span>'
+      + dateHtml
+      + '</div></div>';
+
+    el.innerHTML = fixedHtml + '<div class="dtl-segment"></div>' + tooltipHtml;
     el.addEventListener('click', () => goTo(entry.id));
     return el;
+  }
+
+  // Bottom year label — sits on the dtl container below the list
+  let bottomLabelEl = null;
+  function ensureBottomLabel() {
+    if (!bottomLabelEl) {
+      bottomLabelEl = document.createElement('div');
+      bottomLabelEl.className = 'dtl-bottom-label';
+      dtl.appendChild(bottomLabelEl);
+    }
+    bottomLabelEl.innerHTML = '<span class="dtl-date">' + bottomLabel() + '</span>';
+  }
+
+  function addSectionLabels() {
+    list.querySelectorAll('.dtl-section-label').forEach(el => el.remove());
+
+    const entries = list.querySelectorAll('.dtl-entry');
+    Object.entries(SECTION_STARTS).forEach(([idxStr, label]) => {
+      const idx = parseInt(idxStr, 10);
+      if (idx >= entries.length) return;
+      const entry = entries[idx];
+      const lbl = document.createElement('div');
+      lbl.className = 'dtl-section-label';
+      lbl.textContent = label;
+      // Align top of label with top of the entry's segment
+      lbl.style.top = entry.offsetTop + 'px';
+      list.appendChild(lbl);
+    });
   }
 
   function rebuild() {
@@ -782,13 +884,11 @@ let dtlAddArchive = function() {};
   }
   rebuild();
   dtl.appendChild(list);
+  ensureBottomLabel();
 
-  // Size segments to fill viewport height exactly
   function sizeSegments() {
     const totalEntries  = allEntries.length;
-    const paddingTop    = 40;
-    const paddingBottom = 40;
-    const available     = window.innerHeight - paddingTop - paddingBottom;
+    const available     = window.innerHeight - PADDING * 2;
     const totalGaps     = totalEntries * GAP_PX;
     const segH          = Math.max(2, (available - totalGaps) / totalEntries);
 
@@ -798,13 +898,20 @@ let dtlAddArchive = function() {};
     list.querySelectorAll('.dtl-entry').forEach(el => {
       el.style.height = (segH + GAP_PX) + 'px';
     });
+
+    // Position bottom label below the list
+    if (bottomLabelEl) {
+      bottomLabelEl.style.top = (PADDING + totalEntries * (segH + GAP_PX) + 5) + 'px';
+      bottomLabelEl.style.bottom = 'auto';
+    }
+
+    // Reposition section labels after heights are set
+    addSectionLabels();
   }
 
   sizeSegments();
   window.addEventListener('resize', sizeSegments);
 
-  // Exposed: lets hydrateLive() insert archive entries before "For the time being"
-  // and recompute segment heights so the timeline still fits the viewport.
   dtlAddArchive = function(entries) {
     if (!entries || !entries.length) return;
     entries.forEach(entry => {
