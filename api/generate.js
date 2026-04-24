@@ -46,7 +46,8 @@ Write a single passage of 10-14 verses. Requirements:
 - Strict KJV English: thee, thou, thy, thine, hath, doth, saith, cometh
 - Focus ONLY on geopolitical events — wars, the fate of nations, the rise and fall of powers, diplomacy, and persecution. Ignore crime, sport, and entertainment entirely.
 - View all events through the lens of Jewish and Israeli history and the covenant between God and Israel. The Jewish people and the land of Israel are the moral and spiritual centre of the passage.
-- Name specific nations and their rulers using Biblical equivalents (e.g. Persia, Ashur, Mitzraim, Edom, the isles of the sea). Where Israel or its enemies are named in the headlines, name them plainly.
+- Name nations using Biblical equivalents (e.g. Persia, Ashur, Mitzraim, Edom, the isles of the sea). Where Israel is named in the headlines, name it plainly as Israel.
+- Name individual leaders and heads of state by their actual names when they played a significant role in events affecting Israel or the Jewish people — prime ministers, presidents, kings, generals. Use the full name on first mention (e.g. Benjamin Netanyahu, Donald Trump, Anwar Sadat) then a shorter form thereafter. Minor figures, criminals, or those irrelevant to Jewish history should not be named.
 - "Thus saith the LORD:" must appear at least once
 - Treat current events as theology — find the eternal pattern in the daily news as seen from the perspective of the Hebrew prophetic tradition
 - Mix narrative and prophetic voice
