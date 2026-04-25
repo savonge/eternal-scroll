@@ -450,6 +450,48 @@
   .rests-text { font-family:'Cinzel',serif; font-size:10px; letter-spacing:0.24em; text-transform:uppercase; color:var(--ink-faint); margin-bottom:18px; }
   .rests-next { font-size:17px; font-style:italic; color:var(--ink-light); margin-bottom:8px; }
   .rests-date { font-family:'Cinzel',serif; font-size:14px; color:var(--ink); letter-spacing:0.08em; }
+
+  .rests-countdown {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 32px;
+  }
+  .countdown-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .countdown-number {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    color: var(--ink);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    min-width: 2ch;
+    text-align: center;
+  }
+  .countdown-label {
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .countdown-sep {
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    color: var(--rule);
+    padding-top: 4px;
+    user-select: none;
+  }
+  .rests-arrived {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--ink-light);
+    margin-top: 28px;
+    letter-spacing: 0.04em;
+  }
 </style>
 </head>
 <body>
@@ -508,6 +550,28 @@
     <div class="rests-text">The scroll rests</div>
     <div class="rests-next">The next passage will be written on</div>
     <div class="rests-date">May 13, 2026</div>
+    <div class="rests-countdown" id="countdown-wrap">
+      <div class="countdown-unit">
+        <span class="countdown-number" id="cd-days">--</span>
+        <span class="countdown-label">Days</span>
+      </div>
+      <div class="countdown-sep">·</div>
+      <div class="countdown-unit">
+        <span class="countdown-number" id="cd-hours">--</span>
+        <span class="countdown-label">Hours</span>
+      </div>
+      <div class="countdown-sep">·</div>
+      <div class="countdown-unit">
+        <span class="countdown-number" id="cd-mins">--</span>
+        <span class="countdown-label">Minutes</span>
+      </div>
+      <div class="countdown-sep">·</div>
+      <div class="countdown-unit">
+        <span class="countdown-number" id="cd-secs">--</span>
+        <span class="countdown-label">Seconds</span>
+      </div>
+    </div>
+    <div class="rests-arrived" id="rests-arrived" style="display:none">The time of writing has come.</div>
   </div>
 
 </div><!-- main-wrap -->
@@ -1034,6 +1098,45 @@ function hydrateLive(rows) {
     console.warn('Live fetch failed:', e.message);
     // Fail gracefully — the rest of the scroll renders fine without live content.
   }
+})();
+
+// ── Countdown to next writing ────────────────────────────────────────────────
+(function() {
+  const TARGET = new Date('2026-05-13T00:00:00');
+
+  const elDays  = document.getElementById('cd-days');
+  const elHours = document.getElementById('cd-hours');
+  const elMins  = document.getElementById('cd-mins');
+  const elSecs  = document.getElementById('cd-secs');
+  const wrap    = document.getElementById('countdown-wrap');
+  const arrived = document.getElementById('rests-arrived');
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function tick() {
+    const now  = new Date();
+    const diff = TARGET - now;
+
+    if (diff <= 0) {
+      wrap.style.display = 'none';
+      arrived.style.display = 'block';
+      return;
+    }
+
+    const totalSecs = Math.floor(diff / 1000);
+    const days  = Math.floor(totalSecs / 86400);
+    const hours = Math.floor((totalSecs % 86400) / 3600);
+    const mins  = Math.floor((totalSecs % 3600) / 60);
+    const secs  = totalSecs % 60;
+
+    elDays.textContent  = days;
+    elHours.textContent = pad(hours);
+    elMins.textContent  = pad(mins);
+    elSecs.textContent  = pad(secs);
+  }
+
+  tick();
+  setInterval(tick, 1000);
 })();
 
 </script>
