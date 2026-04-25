@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Eternal Scroll</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke='%23111' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='12' y='8' width='76' height='16' rx='8' stroke-width='5'/%3E%3Crect x='4' y='11' width='7' height='10' rx='2' stroke-width='4'/%3E%3Crect x='89' y='11' width='7' height='10' rx='2' stroke-width='4'/%3E%3Cline x1='12' y1='24' x2='12' y2='76' stroke-width='5'/%3E%3Cline x1='88' y1='24' x2='88' y2='76' stroke-width='5'/%3E%3Cline x1='24' y1='36' x2='76' y2='36' stroke-width='4'/%3E%3Cline x1='24' y1='45' x2='76' y2='45' stroke-width='4'/%3E%3Cline x1='24' y1='54' x2='70' y2='54' stroke-width='4'/%3E%3Cline x1='24' y1='63' x2='76' y2='63' stroke-width='4'/%3E%3Crect x='12' y='76' width='76' height='16' rx='8' stroke-width='5'/%3E%3Crect x='4' y='79' width='7' height='10' rx='2' stroke-width='4'/%3E%3Crect x='89' y='79' width='7' height='10' rx='2' stroke-width='4'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Cinzel:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -1140,5 +1141,63 @@ function hydrateLive(rows) {
 })();
 
 </script>
+
+<!-- ── SCROLL ICON ── -->
+<style>
+  #scroll-fab {
+    position: fixed;
+    bottom: 36px;
+    right: 36px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+    z-index: 9999;
+  }
+  #scroll-fab svg { width: 26px; height: 26px; color: var(--ink); }
+  #scroll-tip {
+    position: fixed;
+    bottom: 88px;
+    right: 36px;
+    background: rgba(20,20,20,0.88);
+    color: #f9f9f9;
+    font-family: 'EB Garamond', serif;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    padding: 6px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.18s;
+  }
+  #scroll-fab:hover + #scroll-tip { opacity: 1; }
+</style>
+
+<div id="scroll-fab">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none"
+       stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <!-- top cylinder -->
+    <rect x="12" y="8"  width="76" height="16" rx="8" stroke-width="5"/>
+    <rect x="4"  y="11" width="7"  height="10" rx="2" stroke-width="4"/>
+    <rect x="89" y="11" width="7"  height="10" rx="2" stroke-width="4"/>
+    <!-- parchment sides -->
+    <line x1="12" y1="24" x2="12" y2="76" stroke-width="5"/>
+    <line x1="88" y1="24" x2="88" y2="76" stroke-width="5"/>
+    <!-- text lines -->
+    <line x1="24" y1="36" x2="76" y2="36" stroke-width="4"/>
+    <line x1="24" y1="45" x2="76" y2="45" stroke-width="4"/>
+    <line x1="24" y1="54" x2="70" y2="54" stroke-width="4"/>
+    <line x1="24" y1="63" x2="76" y2="63" stroke-width="4"/>
+    <!-- bottom cylinder -->
+    <rect x="12" y="76" width="76" height="16" rx="8" stroke-width="5"/>
+    <rect x="4"  y="79" width="7"  height="10" rx="2" stroke-width="4"/>
+    <rect x="89" y="79" width="7"  height="10" rx="2" stroke-width="4"/>
+  </svg>
+</div>
+<div id="scroll-tip">Eternal Scroll by Liron Ross © 2026</div>
+
 </body>
 </html>
