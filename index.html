@@ -25,12 +25,12 @@
   * { margin:0; padding:0; box-sizing:border-box; }
   html { scroll-behavior:smooth; }
 
+  html { overflow-x: hidden; }
   body {
     background: var(--bg);
     color: var(--ink);
     font-family: 'EB Garamond', Georgia, serif;
     line-height: 1.85;
-    overflow-x: hidden;
   }
 
   /* ── PROGRESS ── */
@@ -502,11 +502,11 @@
     width: 40px;
     height: 40px;
     cursor: default;
-    z-index: 900;
-    opacity: 0.55;
-    transition: opacity 0.2s;
+    z-index: 9999;
+    opacity: 0.4;
+    transition: opacity 0.25s;
   }
-  #scroll-badge:hover { opacity: 1; }
+  #scroll-badge:hover { opacity: 0.85; }
   #scroll-badge:hover #scroll-tooltip { opacity: 1; pointer-events: auto; }
 
   #scroll-tooltip {
