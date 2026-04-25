@@ -269,13 +269,23 @@
   /* ── SECTION DIVIDERS ── */
   .section-divider {
     padding: 56px 28px 48px;
-    border-top: 1px solid var(--rule);
-    border-bottom: 1px solid var(--rule);
     background: var(--bg);
     text-align: center;
   }
-  @media (min-width:600px) { .section-divider { padding: 64px 80px 56px; } }
-  @media (min-width:860px) { .section-divider { padding: 64px 40px 56px; } }
+  .section-divider::before,
+  .section-divider::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: var(--rule);
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .section-divider::before { margin-bottom: 56px; }
+  .section-divider::after  { margin-top: 48px; }
+  @media (min-width:600px) { .section-divider { padding: 0 80px; } .section-divider::before { margin-bottom: 64px; } .section-divider::after { margin-top: 56px; } }
+  @media (min-width:860px) { .section-divider { padding: 0 40px; } }
 
   .div-eyebrow {
     font-family: 'Cinzel', serif;
@@ -298,22 +308,28 @@
 
   /* ── BOOK SECTION ── */
   .book-section {
-    border-bottom: 1px solid var(--rule-light);
     scroll-margin-top: 54px;
+  }
+  .book-section::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: var(--rule-light);
+    max-width: 680px;
+    margin: 0 auto;
   }
   @media (min-width:860px) { .book-section { scroll-margin-top:0; } }
 
   /* ── BOOK HEADER — big centered title, no color blocks ── */
   .book-header {
     padding: 64px 28px 48px;
-    border-bottom: 1px solid var(--rule-light);
     text-align: center;
     background: var(--bg);
   }
   @media (min-width:600px) { .book-header { padding: 80px 80px 56px; } }
   @media (min-width:860px) {
-    .book-header { padding: 80px 40px 56px; max-width: 780px; margin: 0 auto; border-bottom: none; }
-    .book-section { border-bottom: 1px solid var(--rule-light); }
+    .book-header { padding: 80px 40px 56px; max-width: 780px; margin: 0 auto; }
+    .book-section { border-bottom: none; }
   }
 
   .book-division-tag {
@@ -418,8 +434,15 @@
 
   /* ── LIVE TYPEWRITER ── */
   #live-current {
-    border-bottom: 1px solid var(--rule-light);
     scroll-margin-top: 54px;
+  }
+  #live-current::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: var(--rule-light);
+    max-width: 680px;
+    margin: 0 auto;
   }
   @media (min-width:860px) { #live-current { scroll-margin-top:0; } }
 
@@ -442,7 +465,14 @@
   #scroll-rests {
     display:none; padding: 80px 28px 100px;
     text-align:center; background: var(--bg);
-    border-top: 1px solid var(--rule);
+  }
+  #scroll-rests::before {
+    content: '';
+    display: block;
+    height: 1px;
+    background: var(--rule);
+    max-width: 680px;
+    margin: 0 auto 80px;
   }
   @media (min-width:860px) { #scroll-rests { padding: 100px 40px 120px; } }
   #scroll-rests.visible { display:block; }
