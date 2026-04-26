@@ -33,8 +33,9 @@
     overflow-x: hidden;
   }
 
-  /* ── PROGRESS ── */
+  /* ── TOP PROGRESS BAR — desktop only ── */
   #progress {
+    display: none;
     position:fixed; top:0; left:0; right:0; height:2px;
     background: var(--rule); z-index:1000;
   }
@@ -43,80 +44,198 @@
     background: var(--ink);
     transition: width 0.12s;
   }
+  @media (min-width:860px) { #progress { display:block; } }
 
-  /* ── TOPBAR ── */
-  #topbar {
-    position:fixed; top:2px; left:0; right:0; height:52px;
-    background: var(--bg); border-bottom: 1px solid var(--rule);
-    display:flex; align-items:center; padding:0 20px; gap:16px; z-index:900;
+  /* ── TOPBAR — hidden; kept for legacy JS refs ── */
+  #topbar { display: none; }
+  #active-label { display: none; }
+
+  /* ── MOBILE SPINE ── */
+  #mobile-spine {
+    display: flex;
+    position: fixed;
+    top: 0; left: 0;
+    width: 44px; height: 100vh;
+    background: var(--bg);
+    flex-direction: column;
+    align-items: center;
+    z-index: 900;
+    padding: 10px 0 16px;
+    gap: 0;
+  }
+  @media (min-width:860px) { #mobile-spine { display:none; } }
+
+  /* Scroll icon button in spine */
+  #spine-menu-btn {
+    background: none; border: none;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; border-radius: 2px;
+    padding: 0; color: var(--ink);
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s;
+    margin-top: 2px;
+  }
+  #spine-menu-btn:active { opacity: 0.5; }
+  #spine-menu-btn svg { width: 20px; height: 20px; }
+
+  /* Vertical progress track in spine — wider tap target */
+  #spine-progress-wrap {
+    flex: 1;
+    width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 14px 0 0;
+    position: relative;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #spine-progress-track {
+    width: 2px;
+    height: 100%;
+    background: var(--rule);
+    border-radius: 1px;
+    position: relative;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  #spine-prog-fill {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 0%;
+    background: var(--ink);
+    transition: height 0.12s;
+    border-radius: 1px;
   }
 
-  #menu-btn {
-    background:none; border: 1px solid var(--rule);
-    width:36px; height:36px; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:5px;
-    cursor:pointer; flex-shrink:0; border-radius:2px;
-    transition: background 0.15s;
+  /* ── SPINE TOOLTIP ── */
+  #spine-tooltip {
+    position: fixed;
+    left: 54px;
+    transform: translateY(-50%);
+    background: #fff;
+    border-radius: 3px;
+    padding: 5px 10px 7px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.13), 0 1px 3px rgba(0,0,0,0.08);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease, top 0.08s linear;
+    z-index: 970;
+    white-space: nowrap;
+    max-width: 200px;
   }
-  #menu-btn:hover { background: var(--bg); }
-  #menu-btn span {
-    display:block; width:16px; height:1.5px;
-    background: var(--ink); transition:all 0.2s;
+  #spine-tooltip::before {
+    content: '';
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-right-color: #fff;
   }
-  #menu-btn.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
-  #menu-btn.open span:nth-child(2) { opacity:0; }
-  #menu-btn.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
-
-  #topbar-title {
-    font-family: 'Cinzel', serif;
-    font-size: 12px; font-weight: 600;
-    letter-spacing: 0.14em; text-transform: uppercase;
-    color: var(--ink);
-  }
-
-  #active-label {
+  #spine-tooltip.visible { opacity: 1; }
+  .stt-name {
+    display: block;
     font-family: 'EB Garamond', serif;
-    font-size: 14px; font-style: italic;
-    color: var(--ink-faint);
-    margin-left: auto;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    max-width: 180px;
+    font-size: 15px;
+    font-style: italic;
+    color: var(--ink);
+    line-height: 1.2;
   }
+  .stt-date {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 8.5px;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  body.drawer-open #spine-tooltip { opacity: 0 !important; }
+  @media (min-width:860px) { #spine-tooltip { display: none; } }
 
-  /* ── OVERLAY ── */
+  /* ── OVERLAY — only covers content, not spine ── */
   #overlay {
-    display:none; position:fixed; inset:0;
-    background: rgba(0,0,0,0.3); z-index:950;
-    opacity:0; transition:opacity 0.25s;
+    display:none; position:fixed;
+    top:0; left:44px; right:0; bottom:0;
+    background: rgba(0,0,0,0.18); z-index:950;
+    opacity:0; transition:opacity 0.28s;
   }
   #overlay.show { display:block; }
   #overlay.visible { opacity:1; }
 
+  /* ── CONTENT SCALE-BACK (SJA effect) ── */
+  #main-wrap {
+    transform-origin: right center;
+    transition: transform 0.32s cubic-bezier(0.4,0,0.2,1),
+                border-radius 0.32s cubic-bezier(0.4,0,0.2,1);
+  }
+  @media (max-width:859px) {
+    body.drawer-open #main-wrap {
+      transform: translateX(24px) scale(0.91);
+      border-radius: 14px;
+    }
+  }
+
   /* ── MOBILE DRAWER ── */
   #drawer {
-    position:fixed; top:0; left:0;
-    width: min(280px,80vw); height:100vh;
-    background:var(--bg); border-right:1px solid var(--rule);
+    position:fixed; top:0; left:44px;
+    width: min(264px, calc(80vw - 44px)); height:100vh;
+    background:var(--bg);
     z-index:960; display:flex; flex-direction:column;
-    transform:translateX(-100%); transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    transform:translateX(calc(-100% - 44px));
+    transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
     overflow:hidden;
   }
   #drawer.open { transform:translateX(0); }
-  #drawer-head { padding:24px 20px 16px; border-bottom:1px solid var(--rule); flex-shrink:0; }
-  #drawer-title { font-family:'Cinzel',serif; font-size:12px; font-weight:600; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink); margin-bottom:2px; }
-  #drawer-sub { font-size:12px; color:var(--ink-faint); }
-  #drawer-scroll { flex:1; overflow-y:auto; padding:8px 0 40px; scrollbar-width:thin; scrollbar-color:var(--rule) transparent; }
-  .tl-book { display:flex; align-items:center; gap:11px; padding:8px 20px 8px 18px; cursor:pointer; border:none; background:none; width:100%; text-align:left; border-left:2px solid transparent; transition:background 0.12s,border-color 0.12s; -webkit-tap-highlight-color:transparent; }
-  .tl-book:hover { background:rgba(0,0,0,0.03); }
+  #drawer-head { display:none; }
+  #drawer-scroll { flex:1; overflow-y:auto; padding:20px 0 0; scrollbar-width:thin; scrollbar-color:var(--rule) transparent; }
+  .tl-book { display:flex; align-items:center; gap:0; padding:5px 16px; cursor:pointer; border:none; background:none; width:100%; text-align:left; border-left:2px solid transparent; transition:background 0.12s,border-color 0.12s; -webkit-tap-highlight-color:transparent; }
+  .tl-book:active { background:rgba(0,0,0,0.04); }
   .tl-book.active { border-left-color:var(--ink); }
-  .tl-dot { width:5px; height:5px; border-radius:50%; background:var(--rule); flex-shrink:0; }
-  .tl-book.active .tl-dot, .tl-book:hover .tl-dot { background:var(--ink); }
+  .tl-dot { display:none; }
+  .tl-pulse { display:none; }
   .tl-name { font-family:'EB Garamond',serif; font-size:15px; color:var(--ink-mid); line-height:1.25; flex:1; }
-  .tl-book.active .tl-name, .tl-book:hover .tl-name { color:var(--ink); }
-  .tl-section-head { padding:14px 20px 4px; font-family:'Cinzel',serif; font-size:8px; font-weight:600; letter-spacing:0.26em; text-transform:uppercase; color:var(--ink-faint); }
-  .tl-era { font-size:11px; color:var(--ink-faint); }
-  .tl-pulse { width:7px; height:7px; border-radius:50%; background:var(--ink); flex-shrink:0; animation:pulse 2s ease-in-out infinite; }
+  .tl-book.active .tl-name { color:var(--ink); }
+  .tl-era { font-size:11px; color:var(--ink-faint); padding-left:8px; white-space:nowrap; }
+  .tl-section-head {
+    padding:18px 16px 4px;
+    font-family:'Cinzel',serif; font-size:8px; font-weight:600;
+    letter-spacing:0.26em; text-transform:uppercase; color:var(--ink-faint);
+    display:flex; align-items:center; width:100%;
+    border:none; background:none; text-align:left;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+    transition: color 0.12s;
+  }
+  .tl-section-head:first-child { padding-top:6px; }
+  .tl-section-head:active { color:var(--ink); }
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.3;transform:scale(0.65);} }
+
+  /* Drawer credits footer — no border */
+  #drawer-credits {
+    flex-shrink: 0;
+    padding: 12px 16px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  #drawer-credits-text {
+    font-family: 'EB Garamond', serif;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--ink-faint);
+    line-height: 1.5;
+    opacity: 0.7;
+  }
+  #drawer-credits-year {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    opacity: 0.45;
+  }
 
   /* ── DESKTOP TIMELINE — Figma B spec ── */
   #desktop-tl {
@@ -261,8 +380,8 @@
   }
 
   /* ── MAIN ── */
-  #main-wrap { padding-top: 54px; }
-  @media (min-width:860px) { #main-wrap { padding-top:0; } }
+  #main-wrap { padding-top: 0; padding-left: 44px; }
+  @media (min-width:860px) { #main-wrap { padding-top:0; padding-left:0; } }
 
 
 
@@ -308,7 +427,7 @@
 
   /* ── BOOK SECTION ── */
   .book-section {
-    scroll-margin-top: 54px;
+    scroll-margin-top: 0;
   }
   .book-section::after {
     content: '';
@@ -434,7 +553,7 @@
 
   /* ── LIVE TYPEWRITER ── */
   #live-current {
-    scroll-margin-top: 54px;
+    scroll-margin-top: 0;
   }
   #live-current::after {
     content: '';
@@ -529,7 +648,34 @@
 
 <div id="progress"><div id="prog-fill"></div></div>
 
-<header id="topbar">
+<!-- MOBILE SPINE — replaces topbar on mobile -->
+<div id="mobile-spine">
+  <button id="spine-menu-btn" aria-label="Open timeline">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none"
+         stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="12" y="8"  width="76" height="16" rx="8" stroke-width="5"/>
+      <rect x="4"  y="11" width="7"  height="10" rx="2" stroke-width="4"/>
+      <rect x="89" y="11" width="7"  height="10" rx="2" stroke-width="4"/>
+      <line x1="12" y1="24" x2="12" y2="76" stroke-width="5"/>
+      <line x1="88" y1="24" x2="88" y2="76" stroke-width="5"/>
+      <line x1="24" y1="36" x2="76" y2="36" stroke-width="4"/>
+      <line x1="24" y1="45" x2="76" y2="45" stroke-width="4"/>
+      <line x1="24" y1="54" x2="70" y2="54" stroke-width="4"/>
+      <line x1="24" y1="63" x2="76" y2="63" stroke-width="4"/>
+      <rect x="12" y="76" width="76" height="16" rx="8" stroke-width="5"/>
+      <rect x="4"  y="79" width="7"  height="10" rx="2" stroke-width="4"/>
+      <rect x="89" y="79" width="7"  height="10" rx="2" stroke-width="4"/>
+    </svg>
+  </button>
+  <div id="spine-progress-wrap">
+    <div id="spine-progress-track">
+      <div id="spine-prog-fill"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Legacy topbar (hidden) — kept for JS compatibility -->
+<header id="topbar" style="display:none">
   <button id="menu-btn" aria-label="Open timeline">
     <span></span><span></span><span></span>
   </button>
@@ -547,6 +693,10 @@
   <div id="drawer-scroll">
     <div id="tl-list"></div>
   </div>
+  <div id="drawer-credits">
+    <div id="drawer-credits-text">Eternal Scroll by Liron Ross</div>
+    <div id="drawer-credits-year">© 2026</div>
+  </div>
 </nav>
 
 <nav id="desktop-tl" aria-label="Timeline"></nav>
@@ -555,11 +705,6 @@
 
 
   <div id="books"></div>
-
-  <div class="section-divider">
-    <div class="div-eyebrow">The Unwritten Years &middot; 450 BCE &ndash; Present</div>
-    <div class="div-title">The Books of the Gap</div>
-  </div>
 
   <div id="gap-books"></div>
 
@@ -616,51 +761,81 @@ const LIVE   = [];
 
 const bookMap = {};
 const bookMapReady = (async () => {
-  const manifest = await fetch('/content/bible/manifest.json').then(r => r.json());
-  const books = await Promise.all(
-    manifest.map(m => fetch('/content/bible/' + m.file).then(r => r.json()))
-  );
-  books.forEach(b => bookMap[b.name] = b);
+  try {
+    const manifestRes = await fetch('/content/bible/manifest.json');
+    if (!manifestRes.ok) throw new Error('manifest.json HTTP ' + manifestRes.status);
+    const manifest = await manifestRes.json();
+    const books = await Promise.all(
+      manifest.map(async (m) => {
+        const r = await fetch('/content/bible/' + m.file);
+        if (!r.ok) throw new Error(m.file + ' HTTP ' + r.status);
+        return r.json();
+      })
+    );
+    books.forEach(b => bookMap[b.name] = b);
+  } catch (e) {
+    console.error('Bible content failed to load — canon books will not render:', e);
+    throw e;
+  }
 })();
+bookMapReady.catch(() => {}); // silence unhandled rejection
 const chapLoaded = {};
 
 function bid(n) { return 'b-' + n.replace(/[\s\/]+/g,'-').replace(/[^a-zA-Z0-9-]/g,''); }
 
+// ── DATE MAPS — must be defined before timeline code uses them ──
+const CANON_DATES = {"Genesis":"c. 2000 BCE","Exodus":"c. 1500 BCE","Leviticus":"c. 1400 BCE","Numbers":"c. 1400 BCE","Deuteronomy":"c. 1400 BCE","Joshua":"c. 1200 BCE","Judges":"c. 1100 BCE","I Samuel":"c. 1050 BCE","II Samuel":"c. 1000 BCE","I Kings":"c. 960 BCE","II Kings":"c. 722 BCE","Isaiah":"c. 740 BCE","Jeremiah":"c. 627 BCE","Ezekiel":"c. 593 BCE","Amos":"c. 760 BCE","Hosea":"c. 750 BCE","Micah":"c. 735 BCE","Zechariah":"c. 520 BCE","Malachi":"c. 450 BCE","Psalms":"c. 1000 BCE","Proverbs":"c. 950 BCE","Job":"c. 600 BCE","Song of Songs":"c. 950 BCE","Ruth":"c. 1100 BCE","Lamentations":"c. 586 BCE","Ecclesiastes":"c. 935 BCE","Esther":"c. 480 BCE","Daniel":"c. 605 BCE","Ezra":"c. 458 BCE","Nehemiah":"c. 445 BCE","I Chronicles":"c. 450 BCE","II Chronicles":"c. 450 BCE"};
+const GAP_DATES   = {"Asif":"c. 300 BCE – 200 CE","Midrash":"c. 200 – 600 CE","Galut":"c. 600 – 1200 CE","Mesorah":"c. 800 – 1500 CE","Iyun":"c. 900 – 1600 CE","Zikhron":"c. 1500 – 1945 CE","Shivah":"c. 1800 – 1967 CE","Olam":"c. 1900 – 2000 CE","Daat":"c. 1950 – 2020 CE","Toledot":"c. 2000 CE – Present"};
+
 // ── TIMELINE ──
 const tlList = document.getElementById('tl-list');
 
+// Section heads: tappable, navigate to first book of section
+const SECTION_NAV = {
+  'Torah':    'b-Genesis',
+  "Nevi\u2019im": 'b-Joshua',
+  'Ketuvim':  'b-Psalms',
+  'Toledot':  'b-Asif',
+  'Nowadays': 'live-current'
+};
+
 Object.entries(TANAKH).forEach(([div, info]) => {
-  const h = document.createElement('div');
+  const h = document.createElement('button');
   h.className = 'tl-section-head';
-  h.textContent = div + ' · ' + info.desc;
+  h.textContent = div;
+  const navId = SECTION_NAV[div] || bid(info.books[0]);
+  h.addEventListener('click', () => { goToAfterClose(navId); });
   tlList.appendChild(h);
   info.books.forEach(name => {
     const btn = document.createElement('button');
     btn.className = 'tl-book';
     btn.dataset.book = bid(name);
-    btn.innerHTML = `<span class="tl-dot"></span><span class="tl-name">${name}</span>`;
-    btn.addEventListener('click', () => { goTo(bid(name)); closeDrawer(); });
+    const dateStr = CANON_DATES[name] ? CANON_DATES[name].replace('c. ', '') : '';
+    btn.innerHTML = `<span class="tl-name">${name}</span><span class="tl-era">${dateStr}</span>`;
+    btn.addEventListener('click', () => { goToAfterClose(bid(name)); });
     tlList.appendChild(btn);
   });
 });
 
-const gh = document.createElement('div');
+const gh = document.createElement('button');
 gh.className = 'tl-section-head';
-gh.textContent = 'The Gap · 450 BCE – Present';
+gh.textContent = 'Toledot';
+gh.addEventListener('click', () => { goToAfterClose('b-Asif'); });
 tlList.appendChild(gh);
 
 GAP.forEach(book => {
   const btn = document.createElement('button');
   btn.className = 'tl-book';
   btn.dataset.book = bid(book.title);
-  btn.innerHTML = `<span class="tl-dot"></span><span class="tl-name">${book.title}</span><span class="tl-era">${book.era.split('–')[0].split('-')[0].trim()}</span>`;
-  btn.addEventListener('click', () => { goTo(bid(book.title)); closeDrawer(); });
+  btn.innerHTML = `<span class="tl-name">${book.title}</span><span class="tl-era">${book.era}</span>`;
+  btn.addEventListener('click', () => { goToAfterClose(bid(book.title)); });
   tlList.appendChild(btn);
 });
 
-const lh = document.createElement('div');
+const lh = document.createElement('button');
 lh.className = 'tl-section-head';
-lh.textContent = 'The Living Word · Now';
+lh.textContent = 'Nowadays';
+lh.addEventListener('click', () => { goToAfterClose('live-current'); });
 tlList.appendChild(lh);
 
 // "For the time being" is always present in the drawer.
@@ -668,8 +843,8 @@ tlList.appendChild(lh);
 const cb = document.createElement('button');
 cb.className = 'tl-book';
 cb.dataset.book = 'live-current';
-cb.innerHTML = `<span class="tl-pulse"></span><span class="tl-name">For the time being</span>`;
-cb.addEventListener('click', () => { goTo('live-current'); closeDrawer(); });
+cb.innerHTML = `<span class="tl-name">For the time being</span>`;
+cb.addEventListener('click', () => { goToAfterClose('live-current'); });
 tlList.appendChild(cb);
 
 bookMapReady.then(() => {
@@ -742,7 +917,7 @@ GAP.forEach(book => {
   sec.id = bid(book.title);
   sec.innerHTML = `
     <div class="book-header">
-      <div class="book-division-tag">The Gap</div>
+      <div class="book-division-tag">Toledot</div>
       <div class="book-name-large">${book.title}</div>
       <div class="book-era">${book.era}</div>
       <div class="book-desc-text">${book.desc}</div>
@@ -885,9 +1060,6 @@ const navObs = new IntersectionObserver(entries => {
 document.querySelectorAll('.book-section').forEach(s => navObs.observe(s));
 
 // ── BUILD DESKTOP TIMELINE ──
-const CANON_DATES = {"Genesis":"c. 2000 BCE","Exodus":"c. 1500 BCE","Leviticus":"c. 1400 BCE","Numbers":"c. 1400 BCE","Deuteronomy":"c. 1400 BCE","Joshua":"c. 1200 BCE","Judges":"c. 1100 BCE","I Samuel":"c. 1050 BCE","II Samuel":"c. 1000 BCE","I Kings":"c. 960 BCE","II Kings":"c. 722 BCE","Isaiah":"c. 740 BCE","Jeremiah":"c. 627 BCE","Ezekiel":"c. 593 BCE","Amos":"c. 760 BCE","Hosea":"c. 750 BCE","Micah":"c. 735 BCE","Zechariah":"c. 520 BCE","Malachi":"c. 450 BCE","Psalms":"c. 1000 BCE","Proverbs":"c. 950 BCE","Job":"c. 600 BCE","Song of Songs":"c. 950 BCE","Ruth":"c. 1100 BCE","Lamentations":"c. 586 BCE","Ecclesiastes":"c. 935 BCE","Esther":"c. 480 BCE","Daniel":"c. 605 BCE","Ezra":"c. 458 BCE","Nehemiah":"c. 445 BCE","I Chronicles":"c. 450 BCE","II Chronicles":"c. 450 BCE"};
-const GAP_DATES   = {"Asif":"c. 300 BCE – 200 CE","Midrash":"c. 200 – 600 CE","Galut":"c. 600 – 1200 CE","Mesorah":"c. 800 – 1500 CE","Iyun":"c. 900 – 1600 CE","Zikhron":"c. 1500 – 1945 CE","Shivah":"c. 1800 – 1967 CE","Olam":"c. 1900 – 2000 CE","Daat":"c. 1950 – 2020 CE","Toledot":"c. 2000 CE – Present"};
-
 // dtlAddArchive: assigned by the IIFE below, called by hydrateLive() once fetch completes.
 let dtlAddArchive = function() {};
 
@@ -1030,22 +1202,167 @@ let dtlAddArchive = function() {};
   };
 })();
 
-// ── PROGRESS ──
+// ── SPINE TOOLTIP ──
+const spineTooltip = document.createElement('div');
+spineTooltip.id = 'spine-tooltip';
+document.body.appendChild(spineTooltip);
+let tooltipVisible = false;
+let tooltipTimer   = null;
+
+function getCurrentBookInfo() {
+  const sections = Array.from(document.querySelectorAll('.book-section'));
+  if (!sections.length) return null;
+  const threshold = window.scrollY + window.innerHeight * 0.25;
+  let current = sections[0];
+  for (const sec of sections) {
+    if (sec.offsetTop <= threshold) current = sec;
+    else break;
+  }
+  const nameEl = current.querySelector('.book-name-large');
+  const name   = nameEl ? nameEl.textContent.trim() : '';
+  // Prefer CANON_DATES lookup, then era element, then division tag
+  let date = CANON_DATES[name] || '';
+  if (!date) {
+    const eraEl = current.querySelector('.book-era');
+    if (eraEl && eraEl.textContent.trim()) date = eraEl.textContent.trim();
+  }
+  if (!date) {
+    // GAP book — look up GAP array
+    const gapBook = GAP.find(b => b.title === name);
+    if (gapBook) date = gapBook.era;
+  }
+  return { name, date };
+}
+
+function positionTooltip() {
+  const wrap = document.getElementById('spine-progress-wrap');
+  if (!wrap) return;
+  const rect     = wrap.getBoundingClientRect();
+  const maxScroll = document.body.scrollHeight - window.innerHeight;
+  const fraction = maxScroll > 0 ? Math.min(1, window.scrollY / maxScroll) : 0;
+  const rawY     = rect.top + fraction * rect.height;
+  const clampY   = Math.max(24, Math.min(window.innerHeight - 24, rawY));
+  spineTooltip.style.top = clampY + 'px';
+}
+
+function renderTooltip() {
+  const info = getCurrentBookInfo();
+  if (!info || !info.name) return;
+  spineTooltip.innerHTML =
+    `<span class="stt-name">${info.name}</span>` +
+    (info.date ? `<span class="stt-date">${info.date}</span>` : '');
+}
+
+function showTooltip() {
+  tooltipVisible = true;
+  renderTooltip();
+  positionTooltip();
+  spineTooltip.classList.add('visible');
+  scheduleHide();
+}
+
+function scheduleHide() {
+  clearTimeout(tooltipTimer);
+  tooltipTimer = setTimeout(() => {
+    spineTooltip.classList.remove('visible');
+    tooltipVisible = false;
+  }, 2400);
+}
+
+function hideTooltipImmediate() {
+  clearTimeout(tooltipTimer);
+  spineTooltip.classList.remove('visible');
+  tooltipVisible = false;
+}
+
+// User-initiated scroll dismisses the tooltip immediately.
+// We exclude touches that started on the spine itself, since the spine tap
+// is what shows the tooltip in the first place — touching there shouldn't
+// hide it. Programmatic smooth-scroll (from a timeline tap) doesn't fire
+// touchstart/wheel, so the tooltip continues to update during that scroll.
+window.addEventListener('touchstart', (e) => {
+  if (!tooltipVisible) return;
+  const spine = document.getElementById('mobile-spine');
+  if (spine && spine.contains(e.target)) return;
+  hideTooltipImmediate();
+}, { passive: true });
+window.addEventListener('wheel', () => {
+  if (tooltipVisible) hideTooltipImmediate();
+}, { passive: true });
+
+// ── PROGRESS + TOOLTIP ON SCROLL ──
 window.addEventListener('scroll', () => {
-  document.getElementById('prog-fill').style.width =
-    (window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100) + '%';
+  const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+  document.getElementById('prog-fill').style.width = pct + '%';
+  const spf = document.getElementById('spine-prog-fill');
+  if (spf) spf.style.height = pct + '%';
+
+  if (tooltipVisible) {
+    renderTooltip();
+    positionTooltip();
+    scheduleHide();
+  }
 }, { passive:true });
+
+// ── SPINE TIMELINE TAP — seek + show tooltip ──
+(function() {
+  const track = document.getElementById('spine-progress-wrap');
+  if (!track) return;
+  track.addEventListener('click', e => {
+    const rect     = track.getBoundingClientRect();
+    const pct      = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
+    window.scrollTo({ top: pct * maxScroll, behavior: 'smooth' });
+    showTooltip();
+  });
+})();
 
 // ── DRAWER ──
 const drawer  = document.getElementById('drawer');
 const overlay = document.getElementById('overlay');
 const menuBtn = document.getElementById('menu-btn');
-function openDrawer()  { drawer.classList.add('open'); overlay.classList.add('show'); menuBtn.classList.add('open'); requestAnimationFrame(()=>overlay.classList.add('visible')); }
-function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('visible'); menuBtn.classList.remove('open'); setTimeout(()=>overlay.classList.remove('show'),260); }
-menuBtn.addEventListener('click', ()=> drawer.classList.contains('open') ? closeDrawer() : openDrawer());
+const spineBtn = document.getElementById('spine-menu-btn');
+
+function openDrawer() {
+  drawer.classList.add('open');
+  overlay.classList.add('show');
+  document.body.classList.add('drawer-open');
+  requestAnimationFrame(() => overlay.classList.add('visible'));
+}
+function closeDrawer() {
+  drawer.classList.remove('open');
+  overlay.classList.remove('visible');
+  document.body.classList.remove('drawer-open');
+  setTimeout(() => overlay.classList.remove('show'), 300);
+}
+
+if (menuBtn) menuBtn.addEventListener('click', () => drawer.classList.contains('open') ? closeDrawer() : openDrawer());
+if (spineBtn) spineBtn.addEventListener('click', () => drawer.classList.contains('open') ? closeDrawer() : openDrawer());
 overlay.addEventListener('click', closeDrawer);
 
-function goTo(id) { const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
+function goTo(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    window.scrollTo({ top: el.offsetTop, behavior: 'smooth' });
+    return;
+  }
+  // Element not in DOM yet — likely a canon book still loading. Wait for
+  // bookMapReady to resolve and the canon to render, then scroll.
+  bookMapReady.then(() => {
+    // Give the .then() canon-render block one tick to actually append nodes
+    setTimeout(() => {
+      const el2 = document.getElementById(id);
+      if (el2) window.scrollTo({ top: el2.offsetTop, behavior: 'smooth' });
+      else console.warn('goTo: element not found after canon render:', id);
+    }, 0);
+  }).catch(() => {
+    console.warn('goTo: cannot scroll to', id, '— canon failed to load');
+  });
+}
+function goToAfterClose(id) {
+  closeDrawer();
+  setTimeout(() => goTo(id), 380);
+}
 function esc(t)   { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function fmtDate(d) {
   const mn = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -1103,8 +1420,8 @@ function hydrateLive(rows) {
     const btn = document.createElement('button');
     btn.className = 'tl-book';
     btn.dataset.book = bid(entry.title);
-    btn.innerHTML = '<span class="tl-dot"></span><span class="tl-name">' + entry.title + '</span>';
-    btn.addEventListener('click', function() { goTo(bid(entry.title)); closeDrawer(); });
+    btn.innerHTML = '<span class="tl-name">' + entry.title + '</span>';
+    btn.addEventListener('click', function() { goToAfterClose(bid(entry.title)); });
     tlList.insertBefore(btn, cb);
   });
 
@@ -1184,6 +1501,7 @@ function hydrateLive(rows) {
 <!-- ── SCROLL ICON ── -->
 <style>
   #scroll-fab {
+    display: none;
     position: fixed;
     bottom: 36px;
     right: 36px;
@@ -1195,6 +1513,7 @@ function hydrateLive(rows) {
     cursor: default;
     z-index: 9999;
   }
+  @media (max-width:859px) { #scroll-fab { display:none !important; } #scroll-tip { display:none !important; } }
   #scroll-fab svg { width: 26px; height: 26px; color: var(--ink); }
   #scroll-tip {
     position: fixed;
