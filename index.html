@@ -1420,7 +1420,7 @@ function hydrateLive(rows) {
     const btn = document.createElement('button');
     btn.className = 'tl-book';
     btn.dataset.book = bid(entry.title);
-    btn.innerHTML = '<span class="tl-name">' + entry.title + '</span>';
+    btn.innerHTML = '<span class="tl-name">' + entry.title + '</span><span class="tl-era">' + fmtDate(entry.date) + '</span>';
     btn.addEventListener('click', function() { goToAfterClose(bid(entry.title)); });
     tlList.insertBefore(btn, cb);
   });
@@ -1431,6 +1431,7 @@ function hydrateLive(rows) {
   // 4. Set the current entry header
   if (current) {
     document.getElementById('live-date-biblical').textContent = current.date_biblical || '';
+    cb.innerHTML = '<span class="tl-name">For the time being</span><span class="tl-era">' + fmtDate(current.date) + '</span>';
     twEntry = current;
 
     // 5. If the live section is already in view (e.g. user landed there directly
