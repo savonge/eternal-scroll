@@ -1,0 +1,197 @@
+[
+  {
+    "name": "Genesis",
+    "order": 1,
+    "file": "01-genesis.json"
+  },
+  {
+    "name": "Exodus",
+    "order": 2,
+    "file": "02-exodus.json"
+  },
+  {
+    "name": "Leviticus",
+    "order": 3,
+    "file": "03-leviticus.json"
+  },
+  {
+    "name": "Numbers",
+    "order": 4,
+    "file": "04-numbers.json"
+  },
+  {
+    "name": "Deuteronomy",
+    "order": 5,
+    "file": "05-deuteronomy.json"
+  },
+  {
+    "name": "Joshua",
+    "order": 6,
+    "file": "06-joshua.json"
+  },
+  {
+    "name": "Judges",
+    "order": 7,
+    "file": "07-judges.json"
+  },
+  {
+    "name": "Ruth",
+    "order": 8,
+    "file": "08-ruth.json"
+  },
+  {
+    "name": "1 Samuel",
+    "order": 9,
+    "file": "09-1-samuel.json"
+  },
+  {
+    "name": "2 Samuel",
+    "order": 10,
+    "file": "10-2-samuel.json"
+  },
+  {
+    "name": "1 Kings",
+    "order": 11,
+    "file": "11-1-kings.json"
+  },
+  {
+    "name": "2 Kings",
+    "order": 12,
+    "file": "12-2-kings.json"
+  },
+  {
+    "name": "1 Chronicles",
+    "order": 13,
+    "file": "13-1-chronicles.json"
+  },
+  {
+    "name": "2 Chronicles",
+    "order": 14,
+    "file": "14-2-chronicles.json"
+  },
+  {
+    "name": "Ezra",
+    "order": 15,
+    "file": "15-ezra.json"
+  },
+  {
+    "name": "Nehemiah",
+    "order": 16,
+    "file": "16-nehemiah.json"
+  },
+  {
+    "name": "Esther",
+    "order": 17,
+    "file": "17-esther.json"
+  },
+  {
+    "name": "Job",
+    "order": 18,
+    "file": "18-job.json"
+  },
+  {
+    "name": "Psalms",
+    "order": 19,
+    "file": "19-psalms.json"
+  },
+  {
+    "name": "Proverbs",
+    "order": 20,
+    "file": "20-proverbs.json"
+  },
+  {
+    "name": "Ecclesiastes",
+    "order": 21,
+    "file": "21-ecclesiastes.json"
+  },
+  {
+    "name": "Song of Solomon",
+    "order": 22,
+    "file": "22-song-of-solomon.json"
+  },
+  {
+    "name": "Isaiah",
+    "order": 23,
+    "file": "23-isaiah.json"
+  },
+  {
+    "name": "Jeremiah",
+    "order": 24,
+    "file": "24-jeremiah.json"
+  },
+  {
+    "name": "Lamentations",
+    "order": 25,
+    "file": "25-lamentations.json"
+  },
+  {
+    "name": "Ezekiel",
+    "order": 26,
+    "file": "26-ezekiel.json"
+  },
+  {
+    "name": "Daniel",
+    "order": 27,
+    "file": "27-daniel.json"
+  },
+  {
+    "name": "Hosea",
+    "order": 28,
+    "file": "28-hosea.json"
+  },
+  {
+    "name": "Joel",
+    "order": 29,
+    "file": "29-joel.json"
+  },
+  {
+    "name": "Amos",
+    "order": 30,
+    "file": "30-amos.json"
+  },
+  {
+    "name": "Obadiah",
+    "order": 31,
+    "file": "31-obadiah.json"
+  },
+  {
+    "name": "Jonah",
+    "order": 32,
+    "file": "32-jonah.json"
+  },
+  {
+    "name": "Micah",
+    "order": 33,
+    "file": "33-micah.json"
+  },
+  {
+    "name": "Nahum",
+    "order": 34,
+    "file": "34-nahum.json"
+  },
+  {
+    "name": "Habakkuk",
+    "order": 35,
+    "file": "35-habakkuk.json"
+  },
+  {
+    "name": "Zephaniah",
+    "order": 36,
+    "file": "36-zephaniah.json"
+  },
+  {
+    "name": "Haggai",
+    "order": 37,
+    "file": "37-haggai.json"
+  },
+  {
+    "name": "Zechariah",
+    "order": 38,
+    "file": "38-zechariah.json"
+  },
+  {
+    "name": "Malachi",
+    "order": 39,
+    "file": "39-malachi.json"
+  }
+]
