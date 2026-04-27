@@ -1499,7 +1499,7 @@ function hydrateLive(rows) {
 
 </script>
 
-<!-- ── SCROLL ICON ── -->
+<!-- ── SCROLL ICON + CREDITS MODAL ── -->
 <style>
   #scroll-fab {
     display: none;
@@ -1511,31 +1511,105 @@ function hydrateLive(rows) {
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: default;
+    cursor: pointer;
     z-index: 9999;
+    background: none;
+    border: none;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s;
   }
-  @media (max-width:859px) { #scroll-fab { display:none !important; } #scroll-tip { display:none !important; } }
+  #scroll-fab:hover { opacity: 0.6; }
+  @media (max-width:859px) { #scroll-fab { display:none !important; } }
   #scroll-fab svg { width: 26px; height: 26px; color: var(--ink); }
-  #scroll-tip {
+
+  /* ── CREDITS MODAL OVERLAY ── */
+  #credits-overlay {
+    display: none;
     position: fixed;
-    bottom: 88px;
-    right: 36px;
-    background: rgba(20,20,20,0.88);
-    color: #f9f9f9;
-    font-family: 'EB Garamond', serif;
-    font-size: 13px;
-    letter-spacing: 0.01em;
-    padding: 6px 12px;
-    border-radius: 4px;
-    white-space: nowrap;
-    pointer-events: none;
+    inset: 0;
+    background: rgba(249,249,249,0.82);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
     opacity: 0;
-    transition: opacity 0.18s;
+    transition: opacity 0.32s ease;
   }
-  #scroll-fab:hover + #scroll-tip { opacity: 1; }
+  #credits-overlay.show { display: flex; }
+  #credits-overlay.visible { opacity: 1; }
+
+  #credits-panel {
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    max-width: 560px;
+    width: calc(100vw - 48px);
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    padding: 52px 52px 48px;
+    position: relative;
+    transform: translateY(12px);
+    transition: transform 0.32s ease;
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule) transparent;
+  }
+  #credits-overlay.visible #credits-panel { transform: translateY(0); }
+
+  #credits-close {
+    position: absolute;
+    top: 20px; right: 22px;
+    background: none; border: none;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 4px 6px;
+    transition: color 0.12s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #credits-close:hover { color: var(--ink); }
+
+  .credits-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 8.5px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 14px;
+  }
+  .credits-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 400;
+    color: var(--ink);
+    line-height: 1.0;
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+  }
+  .credits-byline {
+    font-family: 'EB Garamond', serif;
+    font-size: 17px;
+    font-style: italic;
+    color: var(--ink-light);
+    margin-bottom: 36px;
+  }
+  .credits-rule {
+    height: 1px;
+    background: var(--rule);
+    margin-bottom: 28px;
+  }
+  .credits-body {
+    font-family: 'EB Garamond', serif;
+    font-size: 17px;
+    color: var(--ink-mid);
+    line-height: 1.85;
+  }
 </style>
 
-<div id="scroll-fab">
+<button id="scroll-fab" aria-label="About this work">
   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none"
        stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
     <!-- top cylinder -->
@@ -1555,8 +1629,43 @@ function hydrateLive(rows) {
     <rect x="4"  y="79" width="7"  height="10" rx="2" stroke-width="4"/>
     <rect x="89" y="79" width="7"  height="10" rx="2" stroke-width="4"/>
   </svg>
+</button>
+
+<!-- ── CREDITS MODAL ── -->
+<div id="credits-overlay" role="dialog" aria-modal="true" aria-label="About Eternal Scroll">
+  <div id="credits-panel">
+    <button id="credits-close" aria-label="Close">Close</button>
+    <div class="credits-eyebrow">About this work</div>
+    <div class="credits-title">Eternal Scroll</div>
+    <div class="credits-byline">Liron Ross · 2026</div>
+    <div class="credits-rule"></div>
+    <div class="credits-body">Written in the cadence of biblical prophecy, Eternal Scroll imagines artificial intelligence not simply as a machine of language, but as an instrument of resurrection. The work approaches Jewish textual history as a living genetic code: a vast inheritance of rhythm, memory, law, lament, argument, exile, and return. Through the machine, fragments of this ancient literary DNA are reassembled and awakened into new form. The "engines of thought" are presented as human-made vessels capable of studying, recombining, and generating from what has been preserved. The work asks what happens when the voice of an ancient tradition is not merely archived, but animated. Like taking the DNA of an extinct species and bringing it into motion again, Eternal Scroll treats biblical language as something that can be revived, but never innocently. The act is both wondrous and unsettling: what returns is descended from the source, yet transformed by the process of its making.<br><br>The text belongs to an imagined continuation canon called Toledot. In Hebrew, Toledot means "Generations." The name carries a double meaning: it refers to the generative nature of the text itself, produced through a machine trained on inherited language, and to the generations of Jewish heritage that continue to speak through it. It is a title of lineage and creation, descent and renewal.<br><br>As a scroll, the work suggests transmission across time: from scribe to reader, from exile to return, from memory to generation. As "eternal," it points to the persistence of Jewish text beyond any single age or technology. Eternal Scroll asks whether a people's literary soul can be carried forward through a new kind of vessel, and whether the ancient voice, once thought sealed, might yet generate another generation.</div>
+  </div>
 </div>
-<div id="scroll-tip">Eternal Scroll by Liron Ross © 2026</div>
+
+<script>
+(function() {
+  const fab     = document.getElementById('scroll-fab');
+  const overlay = document.getElementById('credits-overlay');
+  const closeBtn = document.getElementById('credits-close');
+
+  function openCredits() {
+    overlay.classList.add('show');
+    requestAnimationFrame(() => overlay.classList.add('visible'));
+    document.body.style.overflow = 'hidden';
+  }
+  function closeCredits() {
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+    setTimeout(() => overlay.classList.remove('show'), 320);
+  }
+
+  fab.addEventListener('click', openCredits);
+  closeBtn.addEventListener('click', closeCredits);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeCredits(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeCredits(); });
+})();
+</script>
 
 </body>
 </html>
