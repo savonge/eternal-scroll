@@ -833,7 +833,7 @@ cb.innerHTML = `<span class="tl-name">For the time being</span>`;
 cb.addEventListener('click', () => { goToAfterClose('live-current'); });
 tlList.appendChild(cb);
 
-console.log('%c[index-test.html] canon rename + autoload v2', 'color:#888;font-style:italic;');
+console.log('%c[index-test.html] canon rename + autoload + scroll-fix v3', 'color:#888;font-style:italic;');
 bookMapReady.then(() => {
 // ── CANON ──
 const booksEl = document.getElementById('books');
@@ -864,6 +864,7 @@ Object.entries(TANAKH).forEach(([div, info]) => {
         document.getElementById('more-'+bid(name)).appendChild(sentinel);
         const io = new IntersectionObserver((entries) => {
           if (!entries[0].isIntersecting) return;
+          if (window._programmaticScroll) return; // don't grow page during scroll-to
           const from = chapLoaded[name];
           const to = Math.min(from+5, data.chapters.length);
           renderCanon(name, from, to);
@@ -928,6 +929,7 @@ GAP.forEach(book => {
     document.getElementById('more-'+bid(book.title)).appendChild(sentinel);
     const io = new IntersectionObserver((entries) => {
       if (!entries[0].isIntersecting) return;
+      if (window._programmaticScroll) return; // don't grow page during scroll-to
       const to = Math.min(loaded+3, book.chapters.length);
       renderGap(book, loaded, to);
       loaded = to;
@@ -1335,19 +1337,50 @@ if (menuBtn) menuBtn.addEventListener('click', () => drawer.classList.contains('
 if (spineBtn) spineBtn.addEventListener('click', () => drawer.classList.contains('open') ? closeDrawer() : openDrawer());
 overlay.addEventListener('click', closeDrawer);
 
+// Flag observed by autoload sentinels — they skip work while a programmatic
+// scroll is in flight, to prevent DOM growth from moving the scroll target.
+window._programmaticScroll = false;
+
+function _scrollToEl(el) {
+  // Use getBoundingClientRect for accurate document-relative position
+  // (offsetTop only measures from nearest positioned ancestor).
+  const targetY = el.getBoundingClientRect().top + window.scrollY;
+  window._programmaticScroll = true;
+  window.scrollTo({ top: targetY, behavior: 'smooth' });
+
+  // After smooth scroll settles, re-measure and snap. This compensates for
+  // any DOM growth that happened during the scroll (e.g. live-current
+  // typewriter, or sentinels that fired before the flag was honored).
+  let lastY = window.scrollY;
+  let stableTicks = 0;
+  const start = Date.now();
+  function check() {
+    const now = window.scrollY;
+    if (Math.abs(now - lastY) < 1) stableTicks++; else stableTicks = 0;
+    lastY = now;
+    if (stableTicks >= 5 || Date.now() - start > 2000) {
+      // Settled (or timed out) — re-aim
+      const finalY = el.getBoundingClientRect().top + window.scrollY;
+      if (Math.abs(finalY - window.scrollY) > 4) {
+        window.scrollTo({ top: finalY, behavior: 'auto' });
+      }
+      window._programmaticScroll = false;
+      return;
+    }
+    requestAnimationFrame(check);
+  }
+  requestAnimationFrame(check);
+}
+
 function goTo(id) {
   const el = document.getElementById(id);
-  if (el) {
-    window.scrollTo({ top: el.offsetTop, behavior: 'smooth' });
-    return;
-  }
+  if (el) { _scrollToEl(el); return; }
   // Element not in DOM yet — likely a canon book still loading. Wait for
   // bookMapReady to resolve and the canon to render, then scroll.
   bookMapReady.then(() => {
-    // Give the .then() canon-render block one tick to actually append nodes
     setTimeout(() => {
       const el2 = document.getElementById(id);
-      if (el2) window.scrollTo({ top: el2.offsetTop, behavior: 'smooth' });
+      if (el2) _scrollToEl(el2);
       else console.warn('goTo: element not found after canon render:', id);
     }, 0);
   }).catch(() => {
