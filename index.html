@@ -768,6 +768,12 @@ bookMapReady.catch(() => {}); // silence unhandled rejection
 const chapLoaded = {};
 
 function bid(n) { return 'b-' + n.replace(/[\s\/]+/g,'-').replace(/[^a-zA-Z0-9-]/g,''); }
+// Display transform: "1 Chronicles" -> "Chronicles 1", "Song of Solomon" -> unchanged.
+// Used for visible labels only; underlying keys (TANAKH, bookMap, ids) stay the same.
+function displayName(n) {
+  const m = n.match(/^([12])\s+(.+)$/);
+  return m ? (m[2] + ' ' + m[1]) : n;
+}
 
 // ── DATE MAPS — must be defined before timeline code uses them ──
 const CANON_DATES = {"Genesis":"c. 2000 BCE","Exodus":"c. 1500 BCE","Leviticus":"c. 1400 BCE","Numbers":"c. 1400 BCE","Deuteronomy":"c. 1400 BCE","Joshua":"c. 1200 BCE","Judges":"c. 1100 BCE","1 Samuel":"c. 1050 BCE","2 Samuel":"c. 1000 BCE","1 Kings":"c. 960 BCE","2 Kings":"c. 722 BCE","Isaiah":"c. 740 BCE","Jeremiah":"c. 627 BCE","Ezekiel":"c. 593 BCE","Amos":"c. 760 BCE","Hosea":"c. 750 BCE","Micah":"c. 735 BCE","Zechariah":"c. 520 BCE","Malachi":"c. 450 BCE","Psalms":"c. 1000 BCE","Proverbs":"c. 950 BCE","Job":"c. 600 BCE","Song of Solomon":"c. 950 BCE","Ruth":"c. 1100 BCE","Lamentations":"c. 586 BCE","Ecclesiastes":"c. 935 BCE","Esther":"c. 480 BCE","Daniel":"c. 605 BCE","Ezra":"c. 458 BCE","Nehemiah":"c. 445 BCE","1 Chronicles":"c. 450 BCE","2 Chronicles":"c. 450 BCE"};
@@ -797,7 +803,7 @@ Object.entries(TANAKH).forEach(([div, info]) => {
     btn.className = 'tl-book';
     btn.dataset.book = bid(name);
     const dateStr = CANON_DATES[name] ? CANON_DATES[name].replace('c. ', '') : '';
-    btn.innerHTML = `<span class="tl-name">${name}</span><span class="tl-era">${dateStr}</span>`;
+    btn.innerHTML = `<span class="tl-name">${displayName(name)}</span><span class="tl-era">${dateStr}</span>`;
     btn.addEventListener('click', () => { goToAfterClose(bid(name)); });
     tlList.appendChild(btn);
   });
@@ -833,7 +839,7 @@ cb.innerHTML = `<span class="tl-name">For the time being</span>`;
 cb.addEventListener('click', () => { goToAfterClose('live-current'); });
 tlList.appendChild(cb);
 
-console.log('%c[index-test.html] canon rename + autoload + scroll-fix v3', 'color:#888;font-style:italic;');
+console.log('%c[index-test.html] canon rename + autoload + scroll-fix + display-name v4', 'color:#888;font-style:italic;');
 bookMapReady.then(() => {
 // ── CANON ──
 const booksEl = document.getElementById('books');
@@ -849,7 +855,7 @@ Object.entries(TANAKH).forEach(([div, info]) => {
       sec.innerHTML = `
         <div class="book-header">
           <div class="book-division-tag">${div}</div>
-          <div class="book-name-large">${name}</div>
+          <div class="book-name-large">${displayName(name)}</div>
           <div class="book-desc-text">${DESCS[name]||''}</div>
         </div>
         <div class="book-text" id="text-${bid(name)}"></div>
@@ -1081,7 +1087,7 @@ let dtlAddArchive = function() {};
   const allEntries = [];
   Object.entries(TANAKH).forEach(([div, info]) => {
     info.books.forEach(name => {
-      allEntries.push({ id: bid(name), name, date: CANON_DATES[name] || '', div });
+      allEntries.push({ id: bid(name), name: displayName(name), date: CANON_DATES[name] || '', div });
     });
   });
   GAP.forEach(book => {
@@ -1217,8 +1223,11 @@ function getCurrentBookInfo() {
   }
   const nameEl = current.querySelector('.book-name-large');
   const name   = nameEl ? nameEl.textContent.trim() : '';
-  // Prefer CANON_DATES lookup, then era element, then division tag
-  let date = CANON_DATES[name] || '';
+  // CANON_DATES is keyed by original form ("1 Chronicles"). The DOM may show
+  // display form ("Chronicles 1"). Try both.
+  const m = name.match(/^(.+)\s+([12])$/);
+  const origForm = m ? (m[2] + ' ' + m[1]) : name;
+  let date = CANON_DATES[name] || CANON_DATES[origForm] || '';
   if (!date) {
     const eraEl = current.querySelector('.book-era');
     if (eraEl && eraEl.textContent.trim()) date = eraEl.textContent.trim();
